@@ -1,7 +1,8 @@
 from rest_framework import serializers
 from .models import (
     Domaine, UniteEnseignement, Matiere, MatiereGroupee, 
-    Evenement, Presence, Note, NoteConfig
+    Evenement, FichierEvenement, Presence, Exercice, FichierExercice, 
+    Note, NoteConfig
 )
 
 class DomaineSerializer(serializers.ModelSerializer):
@@ -27,6 +28,21 @@ class MatiereGroupeeSerializer(serializers.ModelSerializer):
 class EvenementSerializer(serializers.ModelSerializer):
     class Meta:
         model = Evenement
+        fields = '__all__'
+
+class FichierEvenementSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FichierEvenement
+        fields = '__all__'
+
+class ExerciceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Exercice
+        fields = '__all__'
+
+class FichierExerciceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FichierExercice
         fields = '__all__'
 
 class PresenceSerializer(serializers.ModelSerializer):

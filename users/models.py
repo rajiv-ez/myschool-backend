@@ -23,7 +23,6 @@ class User(AbstractBaseUser, PermissionsMixin):
         ('F', 'Féminin'),
         ('A', 'Autre'),
     )
-
     email = models.EmailField(unique=True)
     nom = models.CharField(max_length=100)
     prenom = models.CharField(max_length=100)
@@ -63,12 +62,18 @@ class Staff(models.Model):
 class Tuteur(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='tuteur')
     profession = models.CharField(max_length=100)
-    lien_parente = models.CharField(max_length=100)
 
 class Eleve(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='eleve')
     matricule = models.CharField(max_length=50)
     # classe_session = models.ForeignKey('academic.ClasseSession', on_delete=models.SET_NULL, null=True, blank=True)
-    tuteurs = models.ManyToManyField(Tuteur, related_name='eleves')
+    tuteurs = models.ManyToManyField(Tuteur, related_name='eleves', through='RelationEleveTuteur')
 
+class RelationEleveTuteur(models.Model):
+    eleve = models.ForeignKey(Eleve, on_delete=models.CASCADE, related_name='relations_tuteurs')
+    tuteur = models.ForeignKey(Tuteur, on_delete=models.CASCADE, related_name='relations_eleves')
+    relation = models.CharField(max_length=100)  # e.g., "Père", "Mère", "Tuteur légal"
+
+    class Meta:
+        unique_together = ('eleve', 'tuteur')  # Un élève ne peut avoir qu'une relation unique avec un tuteur
     

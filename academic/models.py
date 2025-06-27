@@ -1,4 +1,5 @@
 from django.db import models
+from accounting.utils import creer_frais_pour_inscription
 
 class Session(models.Model):
     nom = models.CharField(max_length=255)
@@ -8,7 +9,7 @@ class Session(models.Model):
     auto_activer_palier = models.BooleanField(default=False)
 
     def __str__(self):
-        return self.nom
+        return f"Session {self.nom}"
 
 class Palier(models.Model):
     session = models.ForeignKey(Session, on_delete=models.CASCADE, related_name='paliers')
@@ -53,26 +54,33 @@ class Classe(models.Model):
 class ClasseSession(models.Model):
     classe = models.ForeignKey(Classe, on_delete=models.CASCADE, related_name='instances')
     session = models.ForeignKey(Session, on_delete=models.CASCADE, related_name='classes')
-    nom = models.CharField(max_length=255)
+    #nom = models.CharField(max_length=255)
     description = models.TextField(blank=True)
     capacite = models.PositiveIntegerField(default=0)
 
     def __str__(self):
-        return self.nom
+        return f"{self.classe.nom} ({self.session.nom})"
 
 class Inscription(models.Model):
+    STATUTS = [
+        ('CONFIRMEE', 'Confirmée'),
+        ('EN_ATTENTE', 'En attente'),
+        ('ANNULEE', 'Annulée'),
+    ]
     eleve = models.ForeignKey('users.Eleve', on_delete=models.CASCADE, related_name='inscriptions')
-    classe_session = models.ForeignKey('ClasseSession', on_delete=models.CASCADE, related_name='inscriptions')
+    classe_session = models.ForeignKey(ClasseSession, on_delete=models.CASCADE, related_name='inscriptions')
     date_inscription = models.DateField(auto_now_add=True)
     est_reinscription = models.BooleanField(default=False)
     decision_conseil = models.CharField(max_length=255, blank=True, null=True)  # ex: "Redoublement", "Passage"
     motif_reinscription = models.TextField(blank=True, null=True)
-    statut = models.CharField(max_length=50, choices=[
-        ('CONFIRMEE', 'Confirmée'),
-        ('EN_ATTENTE', 'En attente'),
-        ('ANNULEE', 'Annulée'),
-    ], default='EN_ATTENTE')
+    statut = models.CharField(max_length=50, choices=STATUTS, default='EN_ATTENTE')
 
     def __str__(self):
-        return f"{self.eleve.user.nom} {self.classe_session.nom} ({self.date_inscription})"
+        return f"{self.eleve.user.nom} {self.classe_session} ({self.date_inscription})"
+    
+    def save(self, *args, **kwargs):
+        is_new = self.pk is None
+        super().save(*args, **kwargs)
+        if is_new:
+            creer_frais_pour_inscription(self)
 

@@ -2,18 +2,19 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.core.exceptions import ValidationError
-
 from .models import (
     Domaine, UniteEnseignement, Matiere, MatiereGroupee, 
-    Evenement, Presence, Note, NoteConfig
+    Evenement, FichierEvenement, Presence, Exercice, 
+    FichierExercice, Note, NoteConfig
 )
 
 from academic.models import Inscription
-
 from .serializers import (
     DomaineSerializer, UniteEnseignementSerializer, MatiereSerializer, MatiereGroupeeSerializer,
-    EvenementSerializer, PresenceSerializer, NoteSerializer, NoteConfigSerializer
+    EvenementSerializer, FichierEvenementSerializer, PresenceSerializer, ExerciceSerializer,
+    FichierExerciceSerializer, NoteSerializer, NoteConfigSerializer
 )
+from django_filters.rest_framework import DjangoFilterBackend
 
 class DomaineViewSet(viewsets.ModelViewSet):
     queryset = Domaine.objects.all()
@@ -26,6 +27,8 @@ class UniteEnseignementViewSet(viewsets.ModelViewSet):
 class MatiereViewSet(viewsets.ModelViewSet):
     queryset = Matiere.objects.all()
     serializer_class = MatiereSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['unite', ]
 
 class MatiereGroupeeViewSet(viewsets.ModelViewSet):
     queryset = MatiereGroupee.objects.all()
@@ -34,18 +37,44 @@ class MatiereGroupeeViewSet(viewsets.ModelViewSet):
 class EvenementViewSet(viewsets.ModelViewSet):
     queryset = Evenement.objects.all()
     serializer_class = EvenementSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['type', 'palier', 'classe_session', 'matiere']
+
+class FichierEvenementViewSet(viewsets.ModelViewSet):
+    queryset = FichierEvenement.objects.all()
+    serializer_class = FichierEvenementSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['evenement']
+
+class ExerciceViewSet(viewsets.ModelViewSet):
+    queryset = Exercice.objects.all()
+    serializer_class = ExerciceSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['evenement']
+
+class FichierExerciceViewSet(viewsets.ModelViewSet):
+    queryset = FichierExercice.objects.all()
+    serializer_class = FichierExerciceSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['exercice']
 
 class PresenceViewSet(viewsets.ModelViewSet):
     queryset = Presence.objects.all()
     serializer_class = PresenceSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['evenement', 'inscription']
 
 class NoteViewSet(viewsets.ModelViewSet):
     queryset = Note.objects.all()
     serializer_class = NoteSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['evaluation', 'inscription']
 
 class NoteConfigViewSet(viewsets.ModelViewSet):
     queryset = NoteConfig.objects.all()
     serializer_class = NoteConfigSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['matiere', 'enseignant', 'classe_session']
 
 
 # vues utiles

@@ -29,7 +29,7 @@ class Matiere(models.Model):
         return self.nom
 
 class MatiereGroupee(models.Model):
-    nom = models.CharField(max_length=255)
+    nom = models.CharField(max_length=25545)
     matieres = models.ManyToManyField(Matiere, related_name='groupes')
 
     def __str__(self):
@@ -51,13 +51,35 @@ class Evenement(models.Model):
     matiere = models.ForeignKey(Matiere, on_delete=models.CASCADE, related_name='evenements')
     barreme = models.PositiveSmallIntegerField(default=20)
     description = models.TextField(blank=True)
+    contenu = models.TextField(null=True, blank=True)
+    correction = models.TextField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.titre} ({self.type}) - {self.date}"
 
+class FichierEvenement(models.Model):
+    evenement = models.ForeignKey(Evenement, on_delete=models.CASCADE, related_name='fichiers')
+    fichier = models.FileField(upload_to='teaching/fichiers/evenements/')
+
+class Exercice(models.Model):
+    nom = models.CharField(max_length=255)
+    date = models.DateField()
+    est_a_rendre = models.BooleanField(default=False)
+    echeance = models.DateField(null=True, blank=True)
+    contenu = models.TextField()
+    correction = models.TextField(null=True, blank=True)
+    evenement = models.ForeignKey(Evenement, on_delete=models.SET_NULL, null=True, blank=True, related_name='exercices')
+
+    def __str__(self):
+        return self.nom
+
+class FichierExercice(models.Model):
+    exercice = models.ForeignKey(Exercice, on_delete=models.CASCADE, related_name='fichiers')
+    fichier = models.FileField(upload_to='teaching/fichiers/exercices/')
+
 class Presence(models.Model):
     evenement = models.ForeignKey(Evenement, on_delete=models.CASCADE, related_name='presences')
-    eleve = models.ForeignKey('users.Eleve', on_delete=models.CASCADE, related_name='presences')
+    inscription = models.ForeignKey('academic.Inscription', on_delete=models.CASCADE, related_name='presences', null=True)
     present = models.BooleanField(default=True)
     retard = models.BooleanField(default=False)
     justification = models.TextField(blank=True)
@@ -71,7 +93,7 @@ class Note(models.Model):
     note = models.DecimalField(max_digits=5, decimal_places=2)
 
     def __str__(self):
-        return f"Note {self.note}/{self.barreme} - {self.eleve.user.nom}"
+        return f"Note {self.note}/{self.evaluation.barreme} - {self.inscription}"
 
 class NoteConfig(models.Model):
     matiere = models.ForeignKey(Matiere, on_delete=models.CASCADE, related_name='configs')

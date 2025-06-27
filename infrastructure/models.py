@@ -21,7 +21,7 @@ class Batiment(models.Model):
 class Salle(models.Model):
     batiment = models.ForeignKey(Batiment, on_delete=models.CASCADE, related_name='salles')
     nom = models.CharField(max_length=255)
-    capacite = models.PositiveIntegerField()
+    capacite = models.PositiveSmallIntegerField(default=0)
 
     def __str__(self):
         return f"{self.nom} - {self.batiment.nom}"
