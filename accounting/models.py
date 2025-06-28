@@ -13,7 +13,7 @@ class FraisScolaire(models.Model):
     quantite = models.PositiveIntegerField(default=1)
     montant = models.DecimalField(max_digits=10, decimal_places=2)
     echeance = models.DateField(blank=True, null=True)
-    date_creation = models.DateField(auto_now_add=True)
+    date_creation = models.DateTimeField(auto_now_add=True)
 
 class FraisIndividuel(models.Model):
     STATUS_CHOICES = [
@@ -27,7 +27,7 @@ class FraisIndividuel(models.Model):
     frais = models.ForeignKey(FraisScolaire, on_delete=models.CASCADE, related_name='frais_individuels')
     montant = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     statut = models.CharField(max_length=50, choices=STATUS_CHOICES, default='EN_ATTENTE')
-    date_creation = models.DateField(auto_now_add=True)
+    date_creation = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         unique_together = ('inscription', 'frais')
@@ -45,7 +45,7 @@ class FraisIndividuel(models.Model):
 class Paiement(models.Model):  # ou VersementPaiement si renommage complet
     frais_individuel = models.ForeignKey(FraisIndividuel, on_delete=models.CASCADE, related_name='versements', null=True)
     montant = models.DecimalField(max_digits=10, decimal_places=2)
-    date = models.DateField(auto_now_add=True)
+    date = models.DateTimeField(auto_now_add=True)
     reference = models.CharField(max_length=255, blank=True, null=True)
     user_payeur = models.ForeignKey("users.User", on_delete=models.SET_NULL, blank=True, null=True)
     tiers_payeur = models.CharField(max_length=255, blank=True, null=True)
@@ -69,7 +69,7 @@ class Depense(models.Model):
         ('AUTRES', 'Autres'),
     ]
     montant = models.DecimalField(max_digits=10, decimal_places=2)
-    date = models.DateField(auto_now_add=True)
+    date = models.DateTimeField(auto_now_add=True)
     beneficiaire = models.CharField(max_length=255, null=True)
     reference = models.CharField(max_length=255, blank=True, null=True)
     description = models.TextField()
